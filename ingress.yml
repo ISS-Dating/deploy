@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: example-ingress
+spec:
+  rules:
+    - host: qdate.main
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: service-main
+                port:
+                  number: 8090
+          - path: /match
+            pathType: Prefix
+            backend:
+              service:
+                name: service-main
+                port:
+                  number: 8091
