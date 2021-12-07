@@ -1,0 +1,6 @@
+[submodule "service-main"]
+	path = service-main
+	url = https://github.com/ISS-Dating/service-main
+[submodule "chat-service"]
+	path = chat-service
+	url = https://github.com/ISS-Dating/chat-service

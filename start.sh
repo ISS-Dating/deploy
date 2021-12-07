@@ -1,6 +1,8 @@
 #! /bin/bash
 
 minikube start --driver=docker
+minikube delete --all
+minikube start --driver=docker
 minikube addons enable ingress
 minikube kubectl -- apply -f service.yml
 sleep 3
