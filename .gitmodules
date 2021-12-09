@@ -4,3 +4,6 @@
 [submodule "chat-service"]
 	path = chat-service
 	url = https://github.com/ISS-Dating/chat-service
+[submodule "service-analyzer"]
+	path = service-analyzer
+	url = https://github.com/ISS-Dating/service-analyzer

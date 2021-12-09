@@ -53,6 +53,28 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  name: analyzer
+  labels:
+    app: analyzer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: analyzer
+  template:
+    metadata:
+      labels:
+        app: analyzer
+    spec:
+      containers:
+        - name: main
+          image: aoyako/service-analyzer:latest
+          ports:
+            - containerPort: 32001
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
   name: chat
   labels:
     app: chat
@@ -75,6 +97,54 @@ spec:
             - containerPort: 5567
               name: grpc-web
 ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nsqlookupd
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nsqlookupd
+  template:
+    metadata:
+      labels:
+        app: nsqlookupd
+    spec:
+      containers:
+        - name: nsqlookupd
+          image: nsqio/nsq
+          command: ["/nsqlookupd"]
+          ports:
+            - containerPort: 4160
+              name: one
+            - containerPort: 4161
+              name: two
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nsqd
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nsqd
+  template:
+    metadata:
+      labels:
+        app: nsqd
+    spec:
+      containers:
+        - name: nsqd
+          image: nsqio/nsq
+          command: ["/nsqd", "--broadcast-address=nsqd", "--lookupd-tcp-address=nsqlookupd:4160"]
+          ports:
+            - containerPort: 4151
+              name: one
+            - containerPort: 4150
+              name: two
+---
 apiVersion: v1
 kind: Service
 metadata:
@@ -82,6 +152,7 @@ metadata:
   labels:
     app: postgres
 spec:
+  type: NodePort
   selector:
     app: postgres
   ports:
@@ -105,6 +176,18 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
+  name: service-analyzer
+  labels:
+    app: service-analyzer
+spec:
+  selector:
+    app: analyzer
+  ports:
+  - port: 32001
+---
+apiVersion: v1
+kind: Service
+metadata:
   name: service-chat
   labels:
     app: service-chat
@@ -117,3 +200,33 @@ spec:
       port: 5566
     - name: grpc-web
       port: 5567
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nsqlookupd
+  labels:
+    app: nsqlookupd
+spec:
+  selector:
+    app: nsqlookupd
+  ports:
+    - name: one
+      port: 4160
+    - name: two
+      port: 4161
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nsqd
+  labels:
+    app: nsqd
+spec:
+  selector:
+    app: nsqd
+  ports:
+    - name: one
+      port: 4151
+    - name: two
+      port: 4150
